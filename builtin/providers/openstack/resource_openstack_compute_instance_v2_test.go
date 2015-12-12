@@ -263,7 +263,6 @@ func TestAccComputeV2Instance_bootFromVolumeImage(t *testing.T) {
 				uuid = "%s"
 				source_type = "image"
 				volume_size = 5
-				boot_index = 0
 				destination_type = "volume"
 				delete_on_termination = true
 			}
@@ -319,6 +318,53 @@ func TestAccComputeV2Instance_bootFromVolumeVolume(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeV2InstanceExists(t, "openstack_compute_instance_v2.foo", &instance),
 					testAccCheckComputeV2InstanceBootVolumeAttachment(&instance),
+				),
+			},
+		},
+	})
+}
+
+func TestAccComputeV2Instance_multiEphemeral(t *testing.T) {
+	var instance servers.Server
+	var testAccComputeV2Instance_multiEphemeral = fmt.Sprintf(`
+		resource "openstack_compute_instance_v2" "foo" {
+			name = "terraform-test"
+			security_groups = ["default"]
+			block_device {
+				boot_index = 0
+				delete_on_termination = true
+				destination_type = "local"
+				source_type = "image"
+				uuid = "%s"
+			}
+			block_device {
+				boot_index = -1
+				delete_on_termination = true
+				destination_type = "local"
+				guest_format = "ext4"
+				source_type = "blank"
+				volume_size = 1
+			}
+			block_device {
+				boot_index = -1
+				delete_on_termination = true
+				destination_type = "local"
+				guest_format = "ext4"
+				source_type = "blank"
+				volume_size = 1
+			}
+		}`,
+		os.Getenv("OS_IMAGE_ID"))
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckComputeV2InstanceDestroy,
+		Steps: []resource.TestStep{
+			resource.TestStep{
+				Config: testAccComputeV2Instance_multiEphemeral,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeV2InstanceExists(t, "openstack_compute_instance_v2.foo", &instance),
 				),
 			},
 		},
