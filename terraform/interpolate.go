@@ -477,10 +477,10 @@ func (i *Interpolater) computeResourceMultiVariable(
 			continue
 		}
 
-		// If any value is unknown, the whole thing is unknown
-		if attr == config.UnknownVariableValue {
-			return config.UnknownVariableValue, nil
-		}
+		// // If any value is unknown, the whole thing is unknown
+		// if attr == config.UnknownVariableValue {
+		// 	return config.UnknownVariableValue, nil
+		// }
 
 		values = append(values, attr)
 	}
